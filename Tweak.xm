@@ -31,11 +31,11 @@
 
 %hook SBFluidSwitcherItemContainer
 
-	- (void)scrollViewWillEndDragging: (id)arg1 withVelocity: (CGPoint)arg2 targetContentOffset: (CGPoint*)arg3
+	- (void)scrollViewWillEndDragging: (UIScrollView *)arg1 withVelocity: (CGPoint)arg2 targetContentOffset: (CGPoint*)arg3
 	{
 		%orig;
 
-		if (arg2.y < -3)
+		if (arg1.contentOffset.y <= -140)
 		{
 			UIAlertController * alert = [UIAlertController
 									alertControllerWithTitle:@"QuitAll"
