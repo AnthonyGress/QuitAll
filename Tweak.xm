@@ -1,3 +1,10 @@
+#import "spawn.h"
+
+@interface FBSystemService : NSObject
+	+(id)sharedInstance;
+	-(void)shutdownAndReboot:(BOOL)arg1;
+@end
+
 @interface SBDisplayItem: NSObject
 	@property (nonatomic,copy,readonly) NSString * bundleIdentifier;               //@synthesize bundleIdentifier=_bundleIdentifier - In the implementation block
 @end
@@ -26,7 +33,13 @@
 @end
 
 @interface SBFluidSwitcherItemContainer : UIView
-	-(void)quitAll:(bool)shouldSkipNowPlaying;
+	-(void)quitAllApps:(bool)shouldSkipNowPlaying;
+	-(void)SBReload;
+	-(void)Respring;
+	-(void)Reboot;
+	-(void)SafeMode;
+	-(void)UICache;
+	-(void)LDRestart;
 @end
 
 %hook SBFluidSwitcherItemContainer
@@ -43,37 +56,150 @@
 									preferredStyle:UIAlertControllerStyleActionSheet];
 
 			UIAlertAction* killAllButton = [UIAlertAction
-		                              actionWithTitle:@"Kill All Apps!"
+		                              actionWithTitle:@"Kill All Apps"
 		                              style:UIAlertActionStyleDestructive
 		                              handler:^(UIAlertAction * action) {
-																				[self quitAll:NO];
+																				[self quitAllApps:NO];
 								}];
 
 			UIAlertAction* killAllExceptButton = [UIAlertAction
-		                              actionWithTitle:@"Kill All Except Music!"
+		                              actionWithTitle:@"Kill All Except Music"
 		                              style:UIAlertActionStyleDestructive
 		                              handler:^(UIAlertAction * action) {
-																				[self quitAll:YES];
+																				[self quitAllApps:YES];
 								}];
 
+			UIAlertAction* powerOptionButton = [UIAlertAction
+		                              actionWithTitle:@"Power Options..."
+		                              style:UIAlertActionStyleDestructive
+		                              handler:^(UIAlertAction * action) {
 
-				UIAlertAction* cancelButton = [UIAlertAction
-								actionWithTitle:@"Cancel"
-								style:UIAlertActionStyleCancel
-								handler:^(UIAlertAction * action) {
+																		UIAlertController * powerAlert = [UIAlertController
+																								alertControllerWithTitle:@"Power Options"
+																								message:@"What would you like to do?"
+																								preferredStyle:UIAlertControllerStyleActionSheet];
+
+																		UIAlertAction* sbReloadButton = [UIAlertAction
+																	                              actionWithTitle:@"SBReload"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self SBReload];
+																							}];
+
+																		UIAlertAction* respringButton = [UIAlertAction
+																	                              actionWithTitle:@"Respring"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self Respring];
+																							}];
+
+																		// UIAlertAction* ldRestartButton = [UIAlertAction
+																	  //                             actionWithTitle:@"LDRestart"
+																	  //                             style:UIAlertActionStyleDestructive
+																	  //                             handler:^(UIAlertAction * action) {
+																		// 																	[self LDRestart];
+																		// 					}];
+
+																		UIAlertAction* rebootButton = [UIAlertAction
+																	                              actionWithTitle:@"Reboot"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self Reboot];
+																							}];
+
+																		UIAlertAction* uiCacheButton = [UIAlertAction
+																	                              actionWithTitle:@"UICache"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self UICache];
+																							}];
+
+
+																		UIAlertAction* safeModeButton = [UIAlertAction
+																	                              actionWithTitle:@"SafeMode"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self SafeMode];
+																							}];
+
+
+																		UIAlertAction* cancelButton = [UIAlertAction
+																						actionWithTitle:@"Cancel"
+																						style:UIAlertActionStyleCancel
+																						handler:^(UIAlertAction * action) {
+																						}];
+
+																		[powerAlert addAction:rebootButton];
+																		//[powerAlert addAction:ldRestartButton];
+																		[powerAlert addAction:uiCacheButton];
+																		[powerAlert addAction:safeModeButton];
+																		[powerAlert addAction:respringButton];
+																		[powerAlert addAction:sbReloadButton];
+																		[powerAlert addAction:cancelButton];
+
+																		[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:powerAlert animated:YES completion:nil];
 								}];
 
-			  [alert addAction:killAllButton];
-				[alert addAction:killAllExceptButton];
-				[alert addAction:cancelButton];
+			UIAlertAction* cancelButton = [UIAlertAction
+							actionWithTitle:@"Cancel"
+							style:UIAlertActionStyleCancel
+							handler:^(UIAlertAction * action) {
+							}];
 
-				[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:alert animated:YES completion:nil];
+			[alert addAction:powerOptionButton];
+			[alert addAction:killAllExceptButton];
+		  [alert addAction:killAllButton];
+			[alert addAction:cancelButton];
+
+			[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:alert animated:YES completion:nil];
 		}
 
 	}
 
 	%new
-	-(void)quitAll:(bool)shouldSkipNowPlaying
+	-(void)UICache {
+		pid_t pid;
+		const char* args[] = {"uicache", NULL, NULL};
+		posix_spawn(&pid, "/usr/bin/uicache", NULL, NULL, (char* const*)args, NULL);
+	}
+
+	%new
+	-(void)Respring {
+		pid_t pid;
+		const char* args[] = {"killall", "-9", "SpringBoard", NULL, NULL};
+		posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+	}
+
+	%new
+	-(void)SBReload {
+		pid_t pid;
+		const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
+		posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
+	}
+
+	// %new
+	// -(void)LDRestart {
+	// 	pid_t pid;
+	// 	int status;
+	// 	const char *args[] = {"_ldrestart", NULL};
+	// 	posix_spawn(&pid, "/usr/bin/_ldrestart", NULL, NULL, (char * const *)args, NULL);
+	// 	waitpid(pid, &status, WEXITED);
+	// }
+
+	%new
+	-(void)Reboot {
+		[[objc_getClass("FBSystemService") sharedInstance] shutdownAndReboot:1];
+	}
+
+	%new
+	-(void)SafeMode {
+		pid_t pid;
+		const char* args[] = {"killall", "-SEGV", "SpringBoard", NULL};
+		posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+	}
+
+	%new
+	-(void)quitAllApps:(bool)shouldSkipNowPlaying
 	{
 		//remove the apps
 		SBMainSwitcherViewController *mainSwitcher = [%c(SBMainSwitcherViewController) sharedInstance];
