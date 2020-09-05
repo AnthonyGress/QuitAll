@@ -3,6 +3,7 @@
 @interface FBSystemService : NSObject
 	+(id)sharedInstance;
 	-(void)shutdownAndReboot:(BOOL)arg1;
+	-(void)exitAndRelaunch:(BOOL)arg1;
 @end
 
 @interface SBDisplayItem: NSObject
@@ -79,12 +80,12 @@
 																								message:@"What would you like to do?"
 																								preferredStyle:UIAlertControllerStyleActionSheet];
 
-																		UIAlertAction* sbReloadButton = [UIAlertAction
-																	                              actionWithTitle:@"SBReload"
-																	                              style:UIAlertActionStyleDestructive
-																	                              handler:^(UIAlertAction * action) {
-																																			[self SBReload];
-																							}];
+																		// UIAlertAction* sbReloadButton = [UIAlertAction
+																	  //                             actionWithTitle:@"SBReload"
+																	  //                             style:UIAlertActionStyleDestructive
+																	  //                             handler:^(UIAlertAction * action) {
+																		// 																	[self SBReload];
+																		// 					}];
 
 																		UIAlertAction* respringButton = [UIAlertAction
 																	                              actionWithTitle:@"Respring"
@@ -134,7 +135,7 @@
 																		[powerAlert addAction:uiCacheButton];
 																		[powerAlert addAction:safeModeButton];
 																		[powerAlert addAction:respringButton];
-																		[powerAlert addAction:sbReloadButton];
+																		//[powerAlert addAction:sbReloadButton];
 																		[powerAlert addAction:cancelButton];
 
 																		[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:powerAlert animated:YES completion:nil];
@@ -165,17 +166,18 @@
 
 	%new
 	-(void)Respring {
-		pid_t pid;
-		const char* args[] = {"killall", "-9", "SpringBoard", NULL, NULL};
-		posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+		// pid_t pid;
+		// const char* args[] = {"killall", "-9", "SpringBoard", NULL, NULL};
+		// posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+		[[objc_getClass("FBSystemService") sharedInstance] exitAndRelaunch:1];
 	}
 
-	%new
-	-(void)SBReload {
-		pid_t pid;
-		const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
-		posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
-	}
+	// %new
+	// -(void)SBReload {
+	// 	pid_t pid;
+	// 	const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
+	// 	posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
+	// }
 
 	// %new
 	// -(void)LDRestart {
