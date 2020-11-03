@@ -23,14 +23,12 @@
 @interface SBMainSwitcherViewController: UIViewController
 	+ (id)sharedInstance;
 	-(id)recentAppLayouts;
-	-(void)_rebuildAppListCache;
-	-(void)_destroyAppListCache;
-	-(void)_removeCardForDisplayIdentifier:(id)arg1 ;
 	-(void)_deleteAppLayout:(id)arg1 forReason:(long long)arg2;
+	-(void)_deleteAppLayoutsMatchingBundleIdentifier:(id)arg1;
 @end
 
 @interface SBAppLayout:NSObject
-	@property (nonatomic,copy) NSDictionary * rolesToLayoutItemsMap;
+	-(id)itemForLayoutRole:(long long)arg1;
 @end
 
 @interface SBFluidSwitcherItemContainer : UIView
@@ -80,12 +78,12 @@
 																								message:@"What would you like to do?"
 																								preferredStyle:UIAlertControllerStyleActionSheet];
 
-																		// UIAlertAction* sbReloadButton = [UIAlertAction
-																	  //                             actionWithTitle:@"SBReload"
-																	  //                             style:UIAlertActionStyleDestructive
-																	  //                             handler:^(UIAlertAction * action) {
-																		// 																	[self SBReload];
-																		// 					}];
+																		UIAlertAction* sbReloadButton = [UIAlertAction
+																	                              actionWithTitle:@"SBReload"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self SBReload];
+																							}];
 
 																		UIAlertAction* respringButton = [UIAlertAction
 																	                              actionWithTitle:@"Respring"
@@ -135,7 +133,7 @@
 																		[powerAlert addAction:uiCacheButton];
 																		[powerAlert addAction:safeModeButton];
 																		[powerAlert addAction:respringButton];
-																		//[powerAlert addAction:sbReloadButton];
+																		[powerAlert addAction:sbReloadButton];
 																		[powerAlert addAction:cancelButton];
 
 																		[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:powerAlert animated:YES completion:nil];
@@ -172,12 +170,12 @@
 		[[objc_getClass("FBSystemService") sharedInstance] exitAndRelaunch:1];
 	}
 
-	// %new
-	// -(void)SBReload {
-	// 	pid_t pid;
-	// 	const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
-	// 	posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
-	// }
+	%new
+	-(void)SBReload {
+		pid_t pid;
+		const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
+		posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
+	}
 
 	// %new
 	// -(void)LDRestart {
@@ -211,12 +209,21 @@
 
 		for(SBAppLayout *item in items)
 		{
-			NSString *bundleID = [[[item rolesToLayoutItemsMap] objectForKey: @1] bundleIdentifier];
+			NSString *bundleID = [[item itemForLayoutRole:1] bundleIdentifier];
 
 			if (shouldSkipNowPlaying && [bundleID isEqualToString: nowPlayingID])
 				continue;
 			else
-				[mainSwitcher _deleteAppLayout:item forReason: 1];
+			{
+				if ([mainSwitcher respondsToSelector:@selector(_deleteAppLayout:forReason:)])
+				{
+					[mainSwitcher _deleteAppLayout:item forReason: 1];
+				}
+				else if ([mainSwitcher respondsToSelector:@selector(_deleteAppLayoutsMatchingBundleIdentifier:)])
+				{
+					[mainSwitcher _deleteAppLayoutsMatchingBundleIdentifier:bundleID];
+				}
+			}
 		}
 
 		dispatch_async(dispatch_get_main_queue(), ^{
