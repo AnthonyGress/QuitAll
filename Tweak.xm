@@ -12,6 +12,7 @@
 
 @interface SBApplication : NSObject
 	@property (nonatomic,readonly) NSString * bundleIdentifier;
+	@property (nonatomic,readonly) NSString * displayName;
 @end
 
 @interface SBMediaController : NSObject
@@ -58,14 +59,40 @@
 		                              actionWithTitle:@"Kill All Apps"
 		                              style:UIAlertActionStyleDestructive
 		                              handler:^(UIAlertAction * action) {
-																				[self quitAllApps:NO];
-								}];
 
-			UIAlertAction* killAllExceptButton = [UIAlertAction
-		                              actionWithTitle:@"Kill All Except Music"
-		                              style:UIAlertActionStyleDestructive
-		                              handler:^(UIAlertAction * action) {
-																				[self quitAllApps:YES];
+																		SBApplication* nowPlayingApp = [[%c(SBMediaController) sharedInstance] nowPlayingApplication];
+
+																		if (nowPlayingApp)
+																		{
+																			NSString *message = [NSString stringWithFormat:@"'%@' seems to be playing Media. Do you want to kill it alongwith other apps?",[nowPlayingApp displayName]];
+																			UIAlertController * confirmAlert = [UIAlertController
+																									alertControllerWithTitle:@"QuitAll"
+																									message:message
+																									preferredStyle:UIAlertControllerStyleAlert];
+
+																			UIAlertAction* killButton = [UIAlertAction
+																																	actionWithTitle:@"Kill"
+																																	style:UIAlertActionStyleDestructive
+																																	handler:^(UIAlertAction * action) {
+																																				[self quitAllApps:NO];
+																								}];
+
+																			UIAlertAction* dontKillButton = [UIAlertAction
+																																	actionWithTitle:@"Don't Kill"
+																																	style:UIAlertActionStyleDefault
+																																	handler:^(UIAlertAction * action) {
+																																				[self quitAllApps:YES];
+																								}];
+
+
+																			[confirmAlert addAction:killButton];
+																			[confirmAlert addAction:dontKillButton];
+
+																			[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:confirmAlert animated:YES completion:nil];
+																		}
+																		else
+																			[self quitAllApps:NO];
+
 								}];
 
 			UIAlertAction* powerOptionButton = [UIAlertAction
@@ -146,7 +173,6 @@
 							}];
 
 			[alert addAction:powerOptionButton];
-			[alert addAction:killAllExceptButton];
 		  [alert addAction:killAllButton];
 			[alert addAction:cancelButton];
 
