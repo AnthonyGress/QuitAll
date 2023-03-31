@@ -1,11 +1,11 @@
-export PREFIX = $(THEOS)/toolchain/Xcode11.xctoolchain/usr/bin/
+export THEOS_PACKAGE_SCHEME=rootless
+export TARGET = iphone:clang:13.7:12.0
 
 PACKAGE_VERSION=$(THEOS_PACKAGE_BASE_VERSION)
 
 include $(THEOS)/makefiles/common.mk
 
 export ARCHS = arm64 arm64e
-export TARGET = iphone:clang:13.0:13.0
 
 TWEAK_NAME = QuitAll
 $(TWEAK_NAME)_FILES = Tweak.xm
