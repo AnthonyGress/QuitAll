@@ -185,7 +185,7 @@
 	-(void)UICache {
 		pid_t pid;
 		const char* args[] = {"uicache", NULL, NULL};
-		posix_spawn(&pid, "/usr/bin/uicache", NULL, NULL, (char* const*)args, NULL);
+		posix_spawn(&pid, "/var/jb/usr/bin/uicache", NULL, NULL, (char* const*)args, NULL);
 	}
 
 	%new
@@ -200,7 +200,7 @@
 	-(void)SBReload {
 		pid_t pid;
 		const char* args[] = {"sbreload", NULL, NULL, NULL, NULL};
-		posix_spawn(&pid, "/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
+		posix_spawn(&pid, "/var/jb/usr/bin/sbreload", NULL, NULL, (char* const*)args, NULL);
 	}
 
 	// %new
@@ -221,7 +221,7 @@
 	-(void)SafeMode {
 		pid_t pid;
 		const char* args[] = {"killall", "-SEGV", "SpringBoard", NULL};
-		posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+		posix_spawn(&pid, "/var/jb/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
 	}
 
 	%new

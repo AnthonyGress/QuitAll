@@ -1,7 +1,7 @@
 Package: com.p2kdev.quitall
 Name: QuitAll
 Depends: mobilesubstrate
-Version: 1.1.3
+Version: 1.1.4
 Architecture: iphoneos-arm
 Description: Quit All Apps!
 Maintainer: P2KDev <p2kdev@gmail.com>
