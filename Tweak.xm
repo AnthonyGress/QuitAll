@@ -6,6 +6,11 @@
 	-(void)exitAndRelaunch:(BOOL)arg1;
 @end
 
+@interface UIView (QuitAll)
+  - (id)_viewControllerForAncestor;
+  - (id)_findNearestViewController;
+@end
+
 @interface SBDisplayItem: NSObject
 	@property (nonatomic,copy,readonly) NSString * bundleIdentifier;               //@synthesize bundleIdentifier=_bundleIdentifier - In the implementation block
 @end
@@ -36,6 +41,7 @@
 	-(void)quitAllApps:(bool)shouldSkipNowPlaying;
 	-(void)SBReload;
 	-(void)Respring;
+	-(void)RebootUserspace;
 	-(void)Reboot;
 	-(void)SafeMode;
 	-(void)UICache;
@@ -119,12 +125,12 @@
 																																			[self Respring];
 																							}];
 
-																		// UIAlertAction* ldRestartButton = [UIAlertAction
-																	  //                             actionWithTitle:@"LDRestart"
-																	  //                             style:UIAlertActionStyleDestructive
-																	  //                             handler:^(UIAlertAction * action) {
-																		// 																	[self LDRestart];
-																		// 					}];
+																		UIAlertAction* rebootUserspaceButton = [UIAlertAction
+																	                              actionWithTitle:@"Reboot Userspace"
+																	                              style:UIAlertActionStyleDestructive
+																	                              handler:^(UIAlertAction * action) {
+																																			[self RebootUserspace];
+																							}];
 
 																		UIAlertAction* rebootButton = [UIAlertAction
 																	                              actionWithTitle:@"Reboot"
@@ -156,7 +162,7 @@
 																						}];
 
 																		[powerAlert addAction:rebootButton];
-																		//[powerAlert addAction:ldRestartButton];
+																		[powerAlert addAction:rebootUserspaceButton];
 																		[powerAlert addAction:uiCacheButton];
 																		[powerAlert addAction:safeModeButton];
 																		[powerAlert addAction:respringButton];
@@ -173,10 +179,10 @@
 							}];
 
 			[alert addAction:powerOptionButton];
-		  [alert addAction:killAllButton];
+		  	[alert addAction:killAllButton];
 			[alert addAction:cancelButton];
 
-			[[[UIApplication sharedApplication] keyWindow].rootViewController presentViewController:alert animated:YES completion:nil];
+			[[self _viewControllerForAncestor] presentViewController:alert animated:YES completion:nil];
 		}
 
 	}
@@ -184,16 +190,23 @@
 	%new
 	-(void)UICache {
 		pid_t pid;
-		const char* args[] = {"uicache", NULL, NULL};
+		const char* args[] = {"uicache", "-a", "-r", NULL , NULL};
 		posix_spawn(&pid, "/var/jb/usr/bin/uicache", NULL, NULL, (char* const*)args, NULL);
 	}
 
 	%new
+	-(void)RebootUserspace {
+		pid_t pid;
+		const char* args[] = {"launchctl", "reboot", "userspace", NULL, NULL};
+		posix_spawn(&pid, "/var/jb/usr/bin/launchctl", NULL, NULL, (char* const*)args, NULL);
+	}	
+
+	%new
 	-(void)Respring {
-		// pid_t pid;
-		// const char* args[] = {"killall", "-9", "SpringBoard", NULL, NULL};
-		// posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
-		[[objc_getClass("FBSystemService") sharedInstance] exitAndRelaunch:1];
+		pid_t pid;
+		const char* args[] = {"killall", "-9", "backboardd", NULL, NULL};
+		posix_spawn(&pid, "/var/jb/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+		//[[objc_getClass("FBSystemService") sharedInstance] exitAndRelaunch:1];
 	}
 
 	%new
