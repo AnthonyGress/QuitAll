@@ -55,8 +55,10 @@
 		%orig;
 
 
-
-		[self quitAllApps:YES];
+		if (arg1.contentOffset.y <= -140)
+		{
+			[self quitAllApps:YES];
+		}
 	}
 
 
