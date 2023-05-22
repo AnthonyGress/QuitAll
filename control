@@ -1,9 +1,9 @@
-Package: com.anthonyg.quitall
+Package: com.techx.quitall
 Name: QuitAll
 Depends: mobilesubstrate
 Version: 1.3
 Architecture: iphoneos-arm
 Description: Swipe down on app switcher card to kill all apps!
-Maintainer: anthonyg <techx@opayq.com>
-Author: anthonyg <techx@opayq.com>
+Maintainer: techx <techx@opayq.com>
+Author: techx <techx@opayq.com>
 Section: Tweaks
