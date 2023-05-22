@@ -1,9 +1,9 @@
-Package: com.p2kdev.quitall
+Package: com.techx.quitall
 Name: QuitAll
 Depends: mobilesubstrate
-Version: 1.2
+Version: 1.3
 Architecture: iphoneos-arm
 Description: Swipe down on app switcher card to kill all apps!
-Maintainer: P2KDev <p2kdev@gmail.com>
-Author: P2KDev <p2kdev@gmail.com>
+Maintainer: techx <techx@opayq.com>
+Author: techx <techx@opayq.com>
 Section: Tweaks
